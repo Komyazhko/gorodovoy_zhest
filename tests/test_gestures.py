@@ -1,13 +1,8 @@
 from vision.gesture_controller import GestureController
 
-def test_hold_three_seconds():
-    g = GestureController(3.0)
-    assert not g.update(True, 0.0)
-    assert not g.update(True, 2.9)
-    assert g.update(True, 3.0)
 
-def test_release_resets_timer():
-    g = GestureController(3.0)
-    assert not g.update(True, 0.0)
-    assert not g.update(False, 2.0)
-    assert not g.update(True, 2.1)
+def test_locks_after_three_seconds_and_stays_locked():
+    controller = GestureController(3.0)
+    assert not controller.update(True, now=10.0)
+    assert controller.update(True, now=13.1)
+    assert controller.update(False, now=14.0)

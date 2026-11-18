@@ -1,17 +1,21 @@
-# Gorodovoy Robot
+# Gorodovoy Robot — исправленная интеграционная версия
 
-Базовый проект управления мобильным роботом по жесту поднятой руки. Целевая платформа: Ubuntu 22.04, ROS 2 Humble, Python 3.10.
+Платформа: Ubuntu 22.04 / ROS 2 Humble / Python 3.10.
 
-## Важно перед запуском на роботе
+## Важно
+Это исправленная программная заготовка с разделёнными ROS-узлами восприятия и управления. Она **не включает движение по умолчанию**:
+- RGB и depth должны быть проверены на одной системе координат (aligned depth).
+- `depth_scale` необходимо подтвердить для конкретной камеры.
+- `/cmd_vel_hand_follower` должен быть добавлен отдельным входом в штатный `twist_mux`.
+- Старый `/hand_follower` не удаляется и не останавливается.
+- Физический E-STOP обязателен; веб-кнопка не заменяет его.
 
-Это интеграционная заготовка, а не подтверждённая аппаратная сборка. До движения необходимо проверить реальные RGB/depth topics, совмещение изображений, единицы глубины, frame_id, знак угловой скорости и вход `twist_mux`. Первый тест проводите на минимальной скорости в безопасной зоне с готовой физической аварийной остановкой.
+До завершения этих проверок `depth_aligned` оставляйте `false`, а вход нового контроллера в mux не подключайте.
 
-## Установка
-
+## Установка на роботе
 ```bash
 sudo apt update
-sudo apt install -y ros-humble-ros-base python3-colcon-common-extensions python3-opencv python3-pip
-cd ~/gorodovoy-robot
+sudo apt install -y ros-humble-cv-bridge ros-humble-sensor-msgs ros-humble-geometry-msgs ros-humble-std-msgs python3-colcon-common-extensions python3-opencv python3-pip
 python3 -m pip install -r vision/requirements.txt
 source /opt/ros/humble/setup.bash
 cd ros2_ws
@@ -19,49 +23,38 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
-## Проверка ROS
-
+## Запуск без движения
+Терминал 1:
 ```bash
 source /opt/ros/humble/setup.bash
-ros2 topic list
-ros2 topic info /camera_depth/image_raw
-ros2 topic info /camera_depth/depth/image_raw
-ros2 topic info /diff_cont/cmd_vel_unstamped
+cd ~/gorodovoy-robot/ros2_ws
+source install/setup.bash
+ros2 run hand_follower perception_node
 ```
-
-## Запуск
-
-ROS-узел в отдельном терминале:
-
+Терминал 2:
 ```bash
 source /opt/ros/humble/setup.bash
 cd ~/gorodovoy-robot/ros2_ws
 source install/setup.bash
 ros2 run hand_follower follower_node
 ```
-
-Веб-сервер в другом терминале:
-
+Терминал 3:
 ```bash
 cd ~/gorodovoy-robot
 python3 -m vision.app
 ```
-
 Откройте `http://IP_РОБОТА:5000`.
 
-## Архитектура движения
+## ROS-топики
+Восприятие публикует:
+- `/gorodovoy/target_valid` (`std_msgs/Bool`)
+- `/gorodovoy/target_locked` (`std_msgs/Bool`)
+- `/gorodovoy/emergency_stop` (`std_msgs/Bool`, true = стоп)
+- `/gorodovoy/distance_m` (`std_msgs/Float32`)
+- `/gorodovoy/center_error_px` (`std_msgs/Int32`)
 
-Узел публикует только в `/cmd_vel_hand_follower`. Этот topic требуется отдельно добавить во входы штатного `twist_mux` с подходящим приоритетом. Не публикуйте напрямую в `/diff_cont/cmd_vel_unstamped` и не заменяйте штатный драйвер.
+Контроллер публикует только `/cmd_vel_hand_follower` (`geometry_msgs/Twist`).
+Он не публикует напрямую в `/diff_cont/cmd_vel_unstamped`.
 
-Для реального следования ещё требуется подключить распознавание человека/руки и ROS-публикацию входных данных:
-- `/hand_follower/target_valid` (`std_msgs/Bool`)
-- `/hand_follower/target_locked` (`std_msgs/Bool`)
-- `/hand_follower/emergency_stop` (`std_msgs/Bool`)
-- `/hand_follower/distance_m` (`std_msgs/Float32`)
-- `/hand_follower/center_error_px` (`std_msgs/Int32`)
-
-Поднятая рука должна удерживаться 3 секунды; после фиксации цели опускание руки не отменяет текущую команду. Потеря цели или устаревшая глубина приводит к нулевой скорости.
-
-## Безопасность
-
-`safe_stop_distance_m` по умолчанию 1.2 м. В `config/robot.yaml` указан `depth_scale: 0.001` как распространённый вариант для 16UC1, но его обязательно подтвердить измерением на конкретной камере. Веб-кнопка STOP не заменяет физический E-STOP.
+## Переменные среды
+Веб-сервер по умолчанию слушает `0.0.0.0:5000`. Для внешней сети используйте только доверенную изолированную сеть робота.

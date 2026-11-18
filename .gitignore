@@ -1,12 +1,8 @@
-.env
-**/.env
 __pycache__/
 *.py[cod]
-*.swp
-*.pt
+.env
 .venv/
-venv/
 build/
 install/
 log/
-.pytest_cache/
+*.swp

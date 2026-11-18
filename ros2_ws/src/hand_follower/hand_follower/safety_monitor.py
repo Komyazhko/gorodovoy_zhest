@@ -1,8 +1,10 @@
 import time
 
+
 class FreshnessMonitor:
-    def __init__(self, timeout_sec=0.8):
-        self.timeout_sec = timeout_sec
+    def __init__(self, target_timeout_sec=0.8, depth_timeout_sec=0.8):
+        self.target_timeout_sec = float(target_timeout_sec)
+        self.depth_timeout_sec = float(depth_timeout_sec)
         self.target_stamp = None
         self.depth_stamp = None
 
@@ -14,6 +16,9 @@ class FreshnessMonitor:
 
     def safe(self, now=None):
         now = time.monotonic() if now is None else now
-        return (self.target_stamp is not None and self.depth_stamp is not None
-                and now-self.target_stamp <= self.timeout_sec
-                and now-self.depth_stamp <= self.timeout_sec)
+        return (
+            self.target_stamp is not None
+            and self.depth_stamp is not None
+            and now - self.target_stamp <= self.target_timeout_sec
+            and now - self.depth_stamp <= self.depth_timeout_sec
+        )

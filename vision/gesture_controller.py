@@ -1,8 +1,9 @@
 import time
 
+
 class GestureController:
     def __init__(self, hold_seconds=3.0):
-        self.hold_seconds = hold_seconds
+        self.hold_seconds = float(hold_seconds)
         self.raised_since = None
         self.locked = False
 
