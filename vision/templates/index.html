@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gorodovoy Robot</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body><main class="layout">
+<header><h1>Gorodovoy Robot</h1><span id="connection">Подключение…</span></header>
+<section class="video"><img src="/video" alt="Видеопоток робота"></section>
+<section class="panel">
+<div><small>Жест</small><strong id="gesture">—</strong></div>
+<div><small>Цель зафиксирована</small><strong id="locked">—</strong></div>
+<div><small>Дистанция</small><strong id="distance">—</strong></div>
+<div><small>Движение</small><strong id="motion">—</strong></div>
+</section>
+<section class="controls">
+<button class="danger" id="stop">АВАРИЙНЫЙ STOP</button>
+<button id="enable">Снять программный STOP</button>
+</section>
+<p class="notice">Веб-кнопка не заменяет физическую аварийную остановку.</p>
+</main><script src="{{ url_for('static', filename='js/app.js') }}"></script></body></html>

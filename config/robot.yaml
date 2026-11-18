@@ -1,0 +1,19 @@
+robot:
+  safe_stop_distance_m: 1.2
+  target_lock_seconds: 3.0
+  max_linear_speed_mps: 0.12
+  max_angular_speed_rps: 0.35
+  linear_gain: 0.35
+  angular_gain: 0.8
+  target_timeout_sec: 0.8
+  depth_timeout_sec: 0.8
+  depth_scale: 0.001
+  min_valid_depth_m: 0.25
+  max_valid_depth_m: 5.0
+  center_deadband_px: 35
+  image_width: 640
+  image_height: 480
+ros:
+  rgb_topic: /camera_depth/image_raw
+  depth_topic: /camera_depth/depth/image_raw
+  cmd_vel_topic: /cmd_vel_hand_follower

@@ -1,0 +1,9 @@
+# Только фрагмент для ручного добавления в штатный twist_mux config.
+# Не заменяйте им существующий конфиг.
+twist_mux:
+  ros__parameters:
+    topics:
+      hand_follower:
+        topic: /cmd_vel_hand_follower
+        timeout: 0.5
+        priority: 80
